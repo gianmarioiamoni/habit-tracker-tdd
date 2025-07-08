@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { Notification } from '@/components/Notification';
+import { Notification } from '@/components/ui/Notification';
 
 describe('Notification', () => {
     const mockOnDismiss = jest.fn();

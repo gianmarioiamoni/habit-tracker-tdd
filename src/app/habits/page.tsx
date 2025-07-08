@@ -3,8 +3,8 @@
 import { HabitForm } from '@/components/HabitForm';
 import { HabitGrid } from '@/components/HabitGrid';
 import { Header } from '@/components/Header';
-import { Notification } from '@/components/Notification';
-import { WeekNavigation } from '@/components/WeekNavigation';
+import { Notification } from '@/components/ui/Notification';
+import { WeekNavigation } from '@/components/navigation/WeekNavigation';
 import { useHabitsPage } from '@/hooks/useHabitsPage';
 import { createHabitServiceWithLocalStorage } from '@/lib/habitServiceFactory';
 import { formatWeekRange } from '@/lib/dateUtils';

@@ -1,9 +1,9 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { HabitRow } from '@/components/HabitRow';
+import { HabitRow } from '@/components/habit-grid/HabitRow';
 import { Habit } from '@/domain/habit/Habit';
 
 // Mock HabitDayCell since we're focusing on HabitRow logic
-jest.mock('@/components/HabitDayCell', () => ({
+jest.mock('@/components/habit-grid/HabitDayCell', () => ({
     HabitDayCell: ({ completed, onClick, dayLabel }: any) => (
         <button
             data-testid={`day-cell-${dayLabel}`}

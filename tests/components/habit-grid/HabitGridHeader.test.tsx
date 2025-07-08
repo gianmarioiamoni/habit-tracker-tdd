@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { HabitGridHeader } from '@/components/HabitGridHeader';
+import { HabitGridHeader } from '@/components/habit-grid/HabitGridHeader';
 
 describe('HabitGridHeader', () => {
     const defaultDayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];

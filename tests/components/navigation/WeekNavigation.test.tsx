@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { WeekNavigation } from '@/components/WeekNavigation';
+import { WeekNavigation } from '@/components/navigation/WeekNavigation';
 
 describe('WeekNavigation', () => {
     const mockOnPreviousWeek = jest.fn();
