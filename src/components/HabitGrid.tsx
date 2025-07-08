@@ -1,5 +1,3 @@
-'use client';
-
 import { HabitWeekStatus } from '@/domain/habit/Habit';
 import { HabitGridHeader } from './habit-grid/HabitGridHeader';
 import { HabitRow } from './habit-grid/HabitRow';
