@@ -12,10 +12,12 @@ export const createLocalStorageHabitRepository = (): HabitRepository => {
       const parsed = JSON.parse(stored);
 
       // Convert date strings back to Date objects
-      return parsed.map((habit: any) => ({
-        ...habit,
-        createdAt: new Date(habit.createdAt),
-      }));
+      return parsed.map(
+        (habit: Omit<Habit, "createdAt"> & { createdAt: string }) => ({
+          ...habit,
+          createdAt: new Date(habit.createdAt),
+        })
+      );
     } catch (error) {
       console.error("Error reading habits from localStorage:", error);
       return [];
