@@ -3,8 +3,8 @@ import { HabitRepository } from "./HabitRepository";
 
 const STORAGE_KEY = "habit-tracker-habits";
 
-export class LocalStorageHabitRepository implements HabitRepository {
-  private getStoredHabits(): Habit[] {
+export const createLocalStorageHabitRepository = (): HabitRepository => {
+  const getStoredHabits = (): Habit[] => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) return [];
@@ -20,18 +20,18 @@ export class LocalStorageHabitRepository implements HabitRepository {
       console.error("Error reading habits from localStorage:", error);
       return [];
     }
-  }
+  };
 
-  private saveHabits(habits: Habit[]): void {
+  const saveHabits = (habits: Habit[]): void => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(habits));
     } catch (error) {
       console.error("Error saving habits to localStorage:", error);
     }
-  }
+  };
 
-  async save(habit: Habit): Promise<void> {
-    const habits = this.getStoredHabits();
+  const save = async (habit: Habit): Promise<void> => {
+    const habits = getStoredHabits();
     const existingIndex = habits.findIndex((h) => h.id === habit.id);
 
     if (existingIndex >= 0) {
@@ -40,31 +40,40 @@ export class LocalStorageHabitRepository implements HabitRepository {
       habits.push(habit);
     }
 
-    this.saveHabits(habits);
-  }
+    saveHabits(habits);
+  };
 
-  async findById(id: string): Promise<Habit | null> {
-    const habits = this.getStoredHabits();
+  const findById = async (id: string): Promise<Habit | null> => {
+    const habits = getStoredHabits();
     return habits.find((habit) => habit.id === id) || null;
-  }
+  };
 
-  async findAll(): Promise<Habit[]> {
-    return this.getStoredHabits();
-  }
+  const findAll = async (): Promise<Habit[]> => {
+    return getStoredHabits();
+  };
 
-  async findActive(): Promise<Habit[]> {
-    const habits = this.getStoredHabits();
+  const findActive = async (): Promise<Habit[]> => {
+    const habits = getStoredHabits();
     return habits.filter((habit) => !habit.isArchived);
-  }
+  };
 
-  async findArchived(): Promise<Habit[]> {
-    const habits = this.getStoredHabits();
+  const findArchived = async (): Promise<Habit[]> => {
+    const habits = getStoredHabits();
     return habits.filter((habit) => habit.isArchived);
-  }
+  };
 
-  async delete(id: string): Promise<void> {
-    const habits = this.getStoredHabits();
+  const deleteHabit = async (id: string): Promise<void> => {
+    const habits = getStoredHabits();
     const filtered = habits.filter((habit) => habit.id !== id);
-    this.saveHabits(filtered);
-  }
-}
+    saveHabits(filtered);
+  };
+
+  return {
+    save,
+    findById,
+    findAll,
+    findActive,
+    findArchived,
+    delete: deleteHabit,
+  };
+};

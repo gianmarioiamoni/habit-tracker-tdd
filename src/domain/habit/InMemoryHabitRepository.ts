@@ -1,41 +1,56 @@
 import { Habit } from "./Habit";
 import { HabitRepository } from "./HabitRepository";
 
-export class InMemoryHabitRepository implements HabitRepository {
-  private habits: Habit[] = [];
+type InMemoryHabitRepositoryType = HabitRepository & {
+  clear(): void;
+};
 
-  async save(habit: Habit): Promise<void> {
-    const existingIndex = this.habits.findIndex((h) => h.id === habit.id);
+export const createInMemoryHabitRepository =
+  (): InMemoryHabitRepositoryType => {
+    let habits: Habit[] = [];
 
-    if (existingIndex >= 0) {
-      this.habits[existingIndex] = habit;
-    } else {
-      this.habits.push(habit);
-    }
-  }
+    const save = async (habit: Habit): Promise<void> => {
+      const existingIndex = habits.findIndex((h) => h.id === habit.id);
 
-  async findById(id: string): Promise<Habit | null> {
-    return this.habits.find((habit) => habit.id === id) || null;
-  }
+      if (existingIndex >= 0) {
+        habits[existingIndex] = habit;
+      } else {
+        habits.push(habit);
+      }
+    };
 
-  async findAll(): Promise<Habit[]> {
-    return [...this.habits];
-  }
+    const findById = async (id: string): Promise<Habit | null> => {
+      return habits.find((habit) => habit.id === id) || null;
+    };
 
-  async findActive(): Promise<Habit[]> {
-    return this.habits.filter((habit) => !habit.isArchived);
-  }
+    const findAll = async (): Promise<Habit[]> => {
+      return [...habits];
+    };
 
-  async findArchived(): Promise<Habit[]> {
-    return this.habits.filter((habit) => habit.isArchived);
-  }
+    const findActive = async (): Promise<Habit[]> => {
+      return habits.filter((habit) => !habit.isArchived);
+    };
 
-  async delete(id: string): Promise<void> {
-    this.habits = this.habits.filter((habit) => habit.id !== id);
-  }
+    const findArchived = async (): Promise<Habit[]> => {
+      return habits.filter((habit) => habit.isArchived);
+    };
 
-  // Utility method for testing
-  clear(): void {
-    this.habits = [];
-  }
-}
+    const deleteHabit = async (id: string): Promise<void> => {
+      habits = habits.filter((habit) => habit.id !== id);
+    };
+
+    // Utility method for testing
+    const clear = (): void => {
+      habits = [];
+    };
+
+    return {
+      save,
+      findById,
+      findAll,
+      findActive,
+      findArchived,
+      delete: deleteHabit,
+      clear,
+    };
+  };

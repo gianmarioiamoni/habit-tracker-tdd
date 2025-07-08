@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { HabitService } from '@/domain/habit/HabitService';
-import { LocalStorageHabitRepository } from '@/domain/habit/LocalStorageHabitRepository';
+import { createHabitService, HabitServiceType } from '@/domain/habit/HabitService';
+import { createLocalStorageHabitRepository } from '@/domain/habit/LocalStorageHabitRepository';
 import { HabitWeekStatus } from '@/domain/habit/Habit';
 import { getCurrentWeek } from '@/domain/habit/getCurrentWeek';
 import { HabitForm } from '@/components/HabitForm';
 import { HabitGrid } from '@/components/HabitGrid';
 
 // Initialize service with localStorage repository
-const habitRepository = new LocalStorageHabitRepository();
-const habitService = new HabitService(habitRepository);
+const habitRepository = createLocalStorageHabitRepository();
+const habitService = createHabitService(habitRepository);
 
 export default function HabitsPage() {
     const [habitsWeekStatus, setHabitsWeekStatus] = useState<HabitWeekStatus[]>([]);
