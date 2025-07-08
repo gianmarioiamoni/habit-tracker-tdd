@@ -1,129 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { createHabitService, HabitServiceType } from '@/domain/habit/HabitService';
-import { createLocalStorageHabitRepository } from '@/domain/habit/LocalStorageHabitRepository';
-import { HabitWeekStatus } from '@/domain/habit/Habit';
-import { getCurrentWeek } from '@/domain/habit/getCurrentWeek';
 import { HabitForm } from '@/components/HabitForm';
 import { HabitGrid } from '@/components/HabitGrid';
+import { useHabitsPage } from '@/hooks/useHabitsPage';
+import { createHabitServiceWithLocalStorage } from '@/lib/habitServiceFactory';
+import { formatWeekRange } from '@/lib/dateUtils';
 
 // Initialize service with localStorage repository
-const habitRepository = createLocalStorageHabitRepository();
-const habitService = createHabitService(habitRepository);
+const habitService = createHabitServiceWithLocalStorage();
 
 export default function HabitsPage() {
-    const [habitsWeekStatus, setHabitsWeekStatus] = useState<HabitWeekStatus[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [currentWeek, setCurrentWeek] = useState(getCurrentWeek());
-    const [error, setError] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-    // Load habits on component mount
-    useEffect(() => {
-        loadHabits();
-    }, []);
-
-    const loadHabits = async () => {
-        try {
-            const weekStatus = await habitService.getHabitsWeekStatus();
-            setHabitsWeekStatus(weekStatus);
-        } catch (error) {
-            console.error('Error loading habits:', error);
-        }
-    };
-
-    const handleCreateHabit = async (name: string) => {
-        setIsLoading(true);
-        setError(null);
-        setSuccessMessage(null);
-        try {
-            await habitService.createHabit({ name });
-            await loadHabits(); // Reload to show new habit
-            setSuccessMessage(`Habit "${name}" created successfully!`);
-            // Auto-dismiss success message after 3 seconds
-            setTimeout(() => setSuccessMessage(null), 3000);
-        } catch (error) {
-            console.error('Error creating habit:', error);
-            setError('Failed to create habit. Please try again.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleToggleDay = async (habitId: string, date: string) => {
-        setError(null);
-        try {
-            await habitService.toggleHabitCompletion(habitId, date);
-            await loadHabits(); // Reload to show updated status
-        } catch (error) {
-            console.error('Error toggling habit completion:', error);
-            if (error instanceof Error) {
-                if (error.message.includes('future dates')) {
-                    setError('Cannot mark future dates as completed.');
-                } else if (error.message.includes('Invalid date format')) {
-                    setError('Invalid date format.');
-                } else {
-                    setError('Failed to update habit. Please try again.');
-                }
-            } else {
-                setError('Failed to update habit. Please try again.');
-            }
-        }
-    };
-
-    const handleArchiveHabit = async (habitId: string) => {
-        if (confirm('Are you sure you want to archive this habit?')) {
-            setError(null);
-            try {
-                await habitService.archiveHabit(habitId);
-                await loadHabits(); // Reload to remove archived habit
-            } catch (error) {
-                console.error('Error archiving habit:', error);
-                setError('Failed to archive habit. Please try again.');
-            }
-        }
-    };
-
-    const handleWeekNavigation = async (direction: 'prev' | 'next') => {
-        const currentDate = currentWeek.startDate;
-        const newDate = new Date(currentDate);
-
-        if (direction === 'prev') {
-            newDate.setDate(currentDate.getDate() - 7);
-        } else {
-            newDate.setDate(currentDate.getDate() + 7);
-        }
-
-        const newWeek = getCurrentWeek(newDate);
-        setCurrentWeek(newWeek);
-
-        try {
-            const weekStatus = await habitService.getHabitsWeekStatus(newDate);
-            setHabitsWeekStatus(weekStatus);
-        } catch (error) {
-            console.error('Error loading week data:', error);
-        }
-    };
-
-    const goToCurrentWeek = async () => {
-        const thisWeek = getCurrentWeek();
-        setCurrentWeek(thisWeek);
-        await loadHabits();
-    };
-
-    const formatWeekRange = () => {
-        const start = currentWeek.startDate.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric'
-        });
-        const end = currentWeek.endDate.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-        });
-        return `${start} - ${end}`;
-    };
+    const {
+        habitsWeekStatus,
+        isLoading,
+        currentWeek,
+        error,
+        successMessage,
+        handleCreateHabit,
+        handleToggleDay,
+        handleArchiveHabit,
+        handleWeekNavigation,
+        goToCurrentWeek,
+        dismissError,
+        dismissSuccess,
+    } = useHabitsPage(habitService);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -146,7 +46,7 @@ export default function HabitsPage() {
                             <p className="text-green-800">{successMessage}</p>
                         </div>
                         <button
-                            onClick={() => setSuccessMessage(null)}
+                            onClick={dismissSuccess}
                             className="text-green-600 hover:text-green-800 transition-colors"
                             title="Dismiss notification"
                         >
@@ -163,7 +63,7 @@ export default function HabitsPage() {
                             <p className="text-red-800">{error}</p>
                         </div>
                         <button
-                            onClick={() => setError(null)}
+                            onClick={dismissError}
                             className="text-red-600 hover:text-red-800 transition-colors"
                             title="Dismiss error"
                         >
@@ -198,7 +98,7 @@ export default function HabitsPage() {
                         </button>
                     </div>
                     <div className="text-sm text-gray-900 font-medium">
-                        {formatWeekRange()}
+                        {formatWeekRange(currentWeek)}
                     </div>
                 </div>
 
